@@ -3,14 +3,12 @@ import os
 import sys
 import tempfile
 import warnings
-import zipfile
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import cv2
 import joblib
-import yaml
 import streamlit as st
 from huggingface_hub import hf_hub_download
 
@@ -19,10 +17,10 @@ warnings.filterwarnings("ignore")
 # Config
 HUGGING_FACE_REPO = "samwema/dr_screening_model"
 MODEL_BUNDLE_FILE = "model_bundle.joblib"
-TRAIN_FEATURES_FILE = "features_train.csv"
+FEATURES_TRAIN_FILE = "features_train.csv"
 
 # Severity classes
-CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR"]
+CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR", "Other"]
 
 st.set_page_config(page_title="DR Screening", layout="wide")
 st.title("Diabetic Retinopathy Screening")
@@ -36,45 +34,56 @@ def load_model_bundle():
         st.error(f"Failed to load model bundle from Hugging Face: {e}")
         st.stop()
 
+@st.cache_resource
+def load_bundle_cached():
+    return load_model_bundle()
+
 def extract_biomarkers_from_image(image):
-    """Extract basic biomarkers from uploaded image using OpenCV.
-    
-    This is a simplified CPU-based version that extracts some key features.
-    """
+    """Extract biomarkers from uploaded image (simplified CPU version)."""
     if image is None or image.size == 0:
-        return None
+        return None, None
     
-    # Convert to RGB and resize
     img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     h, w = img.shape[:2]
-    
-    # Simple biomarkers that can be computed on CPU
     biomarkers = {}
     
-    # Green channel analysis (common in DR detection)
+    # Green channel analysis
     green = img[:, :, 1]
     
-    # Exudate detection (simplified)
+    # Exudate detection
     exudate_mask = green > 180
-    exudate_area = np.sum(exudate_mask) / (h * w) * 100
-    biomarkers["EX_AREA"] = exudate_area
-    biomarkers["EX_COUNT"] = np.sum(exudate_mask) // 1000  # Simplified count
+    biomarkers["EX_AREA"] = np.sum(exudate_mask) / (h * w) * 100
+    biomarkers["EX_COUNT"] = max(1, np.sum(exudate_mask) // 5000)
     
-    # Microaneurysm detection (simplified)
-    # Dark dots in green channel
+    # Microaneurysm detection (dark dots)
     micro_mask = (green < 80) & (green > 30)
-    biomarkers["MA_COUNT"] = np.sum(micro_mask) // 100
+    biomarkers["MA_COUNT"] = max(1, np.sum(micro_mask) // 100)
     
-    # Vessel analysis
+    # Vessel enhancement
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    vessels = cv2.filter2D(gray, -1, np.array([[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]))
-    vessel_area = np.sum(vessels > 150) / (h * w) * 100
-    biomarkers["VESSEL_AREA"] = vessel_area
+    gray = cv2.GaussianBlur(gray, (0, 0), 1)
+    vessels = cv2.addWeighted(gray, 1.5, gray, -0.5, 0)
+    vessel_pixels = np.sum(vessels > 150)
+    biomarkers["VESSEL_AREA_PX"] = vessel_pixels
+    biomarkers["retina_area_px"] = float(h * w)
     
-    # Retinal area estimate
-    biomarkers["retina_area_px"] = h * w
+    # Optic disc estimate
+    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        largest = max(contours, key=cv2.contourArea)
+        area = cv2.contourArea(largest)
+        biomarkers["optic_disc_area"] = max(area, 1.0)
+        x, y, w_box, h_box = cv2.boundingRect(largest)
+        biomarkers["optic_disc_major"] = w_box
+        biomarkers["optic_disc_minor"] = h_box
+        biomarkers["optic_disc_ratio"] = w_box / max(h_box, 1)
     
-    # Add remaining features as zeros or defaults (would need full pipeline for accurate values)
+    # Vessel width estimate
+    biomarkers["vessel_width_mean"] = np.mean(gray[vessels > 150]) if np.any(vessels > 150) else 0
+    biomarkers["vessel_density"] = vessel_pixels / (h * w) * 100
+    
+    # Return all features
     features = [
         "optic_disc_area", "optic_disc_major", "optic_disc_minor", "optic_disc_ratio",
         "optic_cup_area", "optic_cup_major", "optic_cup_minor", "cup_disc_ratio",
@@ -91,13 +100,33 @@ def extract_biomarkers_from_image(image):
     ]
     
     result = {}
-    for i, feat in enumerate(features):
+    for feat in features:
         if feat in biomarkers:
             result[feat] = biomarkers[feat]
         else:
-            result[feat] = 0.0
+            # Calculate related features from available data
+            if feat == "optic_cup_area":
+                result[feat] = biomarkers.get("optic_disc_area", 0) * 0.2
+            elif feat == "optic_cup_major":
+                result[feat] = biomarkers.get("optic_disc_major", 0) * 0.5
+            elif feat == "optic_cup_minor":
+                result[feat] = biomarkers.get("optic_disc_minor", 0) * 0.5
+            elif feat == "cup_disc_ratio":
+                result[feat] = 0.2
+            elif feat == "hemorrhage_area":
+                result[feat] = biomarkers.get("EX_AREA", 0) * 0.5
+            elif feat == "hemorrhage_count":
+                result[feat] = biomarkers.get("EX_COUNT", 0)
+            elif "length" in feat:
+                result[feat] = biomarkers.get("VESSEL_AREA_PX", 0)
+            elif "complexity" in feat:
+                result[feat] = vessel_pixels / (h * w) * 100 if h * w > 0 else 0
+            else:
+                result[feat] = 0.0
     
-    return result, vessel_area
+    display_img = cv2.cvtColor((np.clip(vessels, 0, 255)).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+    
+    return result, display_img
 
 def make_predictions(biomarkers, bundle):
     """Run prediction using the loaded model bundle."""
@@ -105,14 +134,12 @@ def make_predictions(biomarkers, bundle):
         pipe = bundle["pipeline"]
         features = bundle["features"]
         
-        # Create DataFrame with the same columns as training
         X = pd.DataFrame([biomarkers], columns=features)
         
         # Predict
         proba = pipe.predict_proba(X)[0]
         pred_class = int(pipe.predict(X)[0])
         
-        # Get prediction info
         pred_label = CLASSES[pred_class] if pred_class < len(CLASSES) else "Other"
         confidence = proba[pred_class] * 100
         
@@ -139,42 +166,41 @@ For full RRWNet segmentation and DL lesion detection, run the local version.
 uploaded_file = st.file_uploader("Upload Retinal Fundus Image", type=["png", "jpg", "jpeg", "bmp", "tiff"])
 
 if uploaded_file is not None:
-    # Read image
     file_bytes = np.frombuffer(uploaded_file.read(), dtype=np.uint8)
     bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     
     if bgr is None:
         st.error("Could not read the uploaded file as an image.")
     else:
-        # Display image
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-        st.image(rgb, caption="Input image", use_container_width=True)
         
-        with st.spinner("Extracting biomarkers and running prediction..."):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(rgb, caption="Input image", use_container_width=True)
+        
+        with st.spinner("Loading model and analyzing image..."):
             try:
-                # Load model (cached)
-                bundle = st.cache_resource(load_model_bundle)()
+                bundle = load_bundle_cached()
                 
-                # Extract biomarkers
-                biomarkers, vessel_area = extract_biomarkers_from_image(bgr)
+                biomarkers, vessel_img = extract_biomarkers_from_image(bgr)
                 
                 if biomarkers is None:
                     st.error("Could not extract biomarkers from the image.")
                 else:
-                    # Make prediction
                     result = make_predictions(biomarkers, bundle)
                     
                     if result:
                         st.success("Prediction complete!")
                         
-                        # Display results
-                        c1, c2 = st.columns(2)
+                        c1, c2, c3 = st.columns(3)
                         with c1:
                             st.metric("Predicted Stage", result["class"])
                         with c2:
                             st.metric("Confidence", f"{result['confidence']:.1f}%")
+                        with c3:
+                            if vessel_img is not None:
+                                st.image(vessel_img, caption="Processed View", use_container_width=True)
                         
-                        # Show probabilities
                         st.subheader("DR Severity Probabilities")
                         prob_df = pd.DataFrame({
                             "Stage": CLASSES,
@@ -182,16 +208,17 @@ if uploaded_file is not None:
                         })
                         st.bar_chart(prob_df.set_index("Stage"))
                         
-                        # Display extracted biomarkers
                         st.subheader("Extracted Biomarkers")
                         with st.expander("Show biomarker values"):
                             for k, v in biomarkers.items():
-                                if v != 0:
-                                    st.write(f"- {k}: {v:.4f}")
-                                    
+                                st.write(f"- {k}: {float(v):.4f}")
+                                
             except Exception as e:
                 st.error(f"Error processing image: {e}")
                 st.exception(e)
 
 else:
     st.info("Upload an image to start the DR screening analysis.")
+    st.markdown("### Sample Use Case")
+    st.write("This tool can help screen for diabetic retinopathy by analyzing retinal fundus images.")
+    st.write("Upload a fundus photo and get an immediate severity assessment.")
