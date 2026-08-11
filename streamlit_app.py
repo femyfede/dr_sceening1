@@ -38,7 +38,7 @@ warnings.filterwarnings("ignore")
 HUGGING_FACE_REPO = "samwema/dr_screening_model"
 MODEL_BUNDLE_FILE = "model_bundle.joblib"
 
-# Class labels
+# Class labels - use the actual classes from the model bundle
 CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR", "Other"]
 
 
@@ -64,7 +64,10 @@ def extract_simplified_biomarkers(image_array):
         green = image_array
         gray = image_array
     
-    # Exudate detection
+    # Normalize green channel
+    green_norm = green.astype(float) / 255.0 if green.max() > 1 else green.astype(float)
+    
+    # Exudate detection (bright areas in green channel)
     exudate_mask = green > 200
     biomarkers["EX_COUNT"] = int(np.sum(exudate_mask) // 500)
     biomarkers["EX_AREA"] = float(np.sum(exudate_mask) / (h * w) * 100)
@@ -79,15 +82,16 @@ def extract_simplified_biomarkers(image_array):
     biomarkers["MA_COUNT"] = int(np.sum(micro_mask) // 100)
     biomarkers["MA_A"] = float(np.sum(micro_mask) / (h * w) * 100)
     
-    # Hemorrhage detection
-    hem_mask = (green < 100) & (green > 40) & (green < 120)
+    # Hemorrhage detection (red/brown areas appear dark in green channel)
+    hem_mask = (green < 100) & (green > 40)
     biomarkers["HE_COUNT"] = int(np.sum(hem_mask) // 300)
     biomarkers["HA"] = float(np.sum(hem_mask) / (h * w) * 100)
     biomarkers["HA_RET"] = biomarkers["HA"]
     
     # Vessel detection using Gaussian enhancement
-    blurred = gaussian_filter(gray.astype(float) / 255.0, sigma=1)
-    vessels = (gray.astype(float) / 255.0) * 1.5 - blurred * 0.5
+    gray_f = gray.astype(float) / 255.0 if gray.max() > 1 else gray.astype(float)
+    blurred = gaussian_filter(gray_f, sigma=1)
+    vessels = gray_f * 1.5 - blurred * 0.5
     vessels = np.clip(vessels * 255, 0, 255)
     vessel_mask = vessels > 120
     vessel_pixels = int(np.sum(vessel_mask))
@@ -95,8 +99,8 @@ def extract_simplified_biomarkers(image_array):
     biomarkers["LA"] = float(vessel_pixels / (h * w) * 100)
     biomarkers["LA_RET"] = biomarkers["LA"]
     
-    # Optic disc approximation
-    thresh = gray > 200
+    # Optic disc approximation (brightest area)
+    thresh = gray > (gray.mean() + gray.std())
     labels, num = ndimage.label(thresh)
     od_area = 0
     if num > 0:
@@ -108,41 +112,7 @@ def extract_simplified_biomarkers(image_array):
     # Retinal area
     biomarkers["retina_area_px"] = float(h * w)
     
-    # Fill all features with estimated values
-    result = {}
-    for feat in [
-        "AVR", "CRAE", "CRVE", "VD", "AD", "VeD", "TI", "CI", "FD",
-        "ATI", "VTI", "AFD", "VFD", "JUNC", "VLEN",
-        "AWID", "AWID_SD", "VWID", "VWID_SD", "WID", "WID_SD", "ADV_RATIO",
-        "LA", "HA", "EA", "MAC",
-        "HE_COUNT", "EX_COUNT", "CTW_A", "MA_A", "LA_RET", "HA_RET", "EA_RET",
-    ]:
-        if feat in biomarkers:
-            result[feat] = biomarkers[feat]
-        elif feat == "AVR":
-            result[feat] = 0.15
-        elif feat in ["CRAE", "CRVE", "AD", "VeD"]:
-            result[feat] = 50.0
-        elif feat in ["VD", "TI", "CI", "FD", "ATI", "VTI", "AFD", "VFD", "JUNC", "VLEN"]:
-            result[feat] = 10.0
-        elif feat in ["AWID", "VWID", "WID"]:
-            result[feat] = 5.0
-        elif feat in ["AWID_SD", "VWID_SD", "WID_SD"]:
-            result[feat] = 1.0
-        elif feat == "ADV_RATIO":
-            result[feat] = 0.1
-        elif feat == "EA_RET":
-            result[feat] = biomarkers.get("EX_AREA", 1.0)
-        elif feat == "EA":
-            result[feat] = biomarkers.get("EX_AREA", 5.0)
-        elif feat == "MAC":
-            result[feat] = biomarkers.get("VESSEL_COMPLEXITY", 10.0)
-        elif feat == "CTW_A":
-            result[feat] = 0.5
-        else:
-            result[feat] = 0.0
-    
-    return result
+    return biomarkers
 
 
 def predict_severity(biomarkers, bundle):
@@ -160,13 +130,19 @@ def predict_severity(biomarkers, bundle):
     proba = pipe.predict_proba(X)[0]
     pred_class = int(pipe.predict(X)[0])
     
-    pred_label = CLASSES[pred_class] if pred_class < len(CLASSES) else "Other"
+    # Get the actual class labels from the model
+    classes = bundle["classes"]
+    class_names = classes if classes else CLASSES
+    
+    # Handle variable number of classes
+    pred_label = class_names[pred_class] if pred_class < len(class_names) else "Other"
     confidence = proba[pred_class] * 100
     
     return {
         "class": pred_label,
         "confidence": confidence,
-        "probabilities": proba.tolist()
+        "probabilities": proba.tolist(),
+        "class_names": class_names
     }
 
 
@@ -184,6 +160,7 @@ The full version with RRWNet segmentation is available locally.
 # Load model
 try:
     bundle = st.cache_resource(load_model_bundle)()
+    available_classes = bundle.get("classes", CLASSES)
 except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
@@ -213,6 +190,7 @@ if uploaded_file is not None:
             
             # Make prediction
             result = predict_severity(biomarkers, bundle)
+            class_names = result["class_names"]
             
             with col2:
                 # Show enhanced image
@@ -230,13 +208,33 @@ if uploaded_file is not None:
             with c3:
                 st.metric("Model", bundle["model_name"])
             
-            # Probability distribution
+            # Probability distribution - use actual classes from model
             st.subheader("DR Severity Probabilities")
             prob_df = pd.DataFrame({
-                "Stage": CLASSES,
+                "Stage": class_names,
                 "Probability (%)": [p * 100 for p in result["probabilities"]]
             })
             st.bar_chart(prob_df.set_index("Stage"))
+            
+            # Visualize biomarker extraction
+            st.subheader("Biomarker Visualization")
+            fig_col1, fig_col2, fig_col3 = st.columns(3)
+            
+            with fig_col1:
+                green = rgb[:, :, 1]
+                exudate_mask = green > 200
+                st.image((exudate_mask * 255).astype(np.uint8), caption="Exudates", channels="GRAY")
+            
+            with fig_col2:
+                micro_mask = (green < 80) & (green > 30)
+                st.image((micro_mask * 255).astype(np.uint8), caption="Microaneurysms", channels="GRAY")
+            
+            with fig_col3:
+                gray_f = gray.astype(float) / 255.0 if gray.max() > 1 else gray.astype(float)
+                blurred = gaussian_filter(gray_f, sigma=1)
+                vessels = gray_f * 1.5 - blurred * 0.5
+                vessel_mask = (np.clip(vessels * 255, 0, 255) > 120) * 255
+                st.image(vessel_mask.astype(np.uint8), caption="Vessels", channels="GRAY")
             
             # Show biomarkers
             with st.expander("Extracted Biomarkers"):
@@ -246,14 +244,15 @@ if uploaded_file is not None:
                         
     except Exception as e:
         st.error(f"Processing failed: {e}")
-        st.exception(e)
+        import traceback
+        st.text(traceback.format_exc())
 
 else:
     st.info("Upload a fundus image to start analysis.")
     
-    with st.expander("Sample Results (from training data)"):
-        st.write("When you upload an image, you'll see:")
-        st.write("- Predicted DR severity class (No DR, Mild, Moderate, Severe, Proliferative)")
-        st.write("- Confidence score and probability distribution")
-        st.write("- Extracted biomarkers from the image")
-        st.write("- Enhanced visualization")
+    with st.expander("What to expect"):
+        st.write("When you upload an image, the app will:")
+        st.write("- Extract biomarkers using image processing")
+        st.write("- Predict DR severity class (No DR, Mild, Moderate, Severe, Proliferative)")
+        st.write("- Show confidence scores and probability distribution")
+        st.write("- Display visualization of detected features")
