@@ -1,0 +1,7 @@
+class,support,precision,recall,f1,accuracy,macro_f1,qwk
+No DR,2120,0.72,0.6599,0.6887,,,
+Mild DR,1144,0.3689,0.465,0.4114,,,
+Moderate DR,1572,0.5446,0.3925,0.4562,,,
+Severe DR,1023,0.558,0.6491,0.6001,,,
+Proliferative DR,1090,0.4899,0.5578,0.5217,,,
+overall,6949,,,,0.5497,0.5356,0.6926

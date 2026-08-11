@@ -1,0 +1,256 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\rrwnet\preprocessing.py:91: RuntimeWarning: invalid value encountered in divide
+  enhanced_image = subtracted_image/np.std(subtracted_image)
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py:91: RuntimeWarning: invalid value encountered in cast
+  av_bgr = (np.clip(pred, 0, 1) * 255).astype(np.uint8)
+Process SpawnProcess-1:
+Traceback (most recent call last):
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\run_extract.py", line 61, in _worker
+    res, err = pipeline.process_one(cfg, model, row._asdict())
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 95, in process_one
+    les = compute_lesion_features_cuda(rgb, device)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 69, in compute_lesion_features_cuda
+    pred = segment(rgb, train_datasets=Dataset.ALL, device=device, image_resolution=1024)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py", line 61, in segment
+    image, roi, transforms = autofit_fundus_resolution(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        image, image_resolution, return_roi=True
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 28, in autofit_fundus_resolution
+    image, roi, margins = autocrop_fundus(fundus)
+                          ~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 139, in autocrop_fundus
+    x_range = (np.min(not_null_pixels[:, :, 0]), np.max(not_null_pixels[:, :, 0]))
+                      ~~~~~~~~~~~~~~~^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\rrwnet\preprocessing.py:91: RuntimeWarning: invalid value encountered in divide
+  enhanced_image = subtracted_image/np.std(subtracted_image)
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py:91: RuntimeWarning: invalid value encountered in cast
+  av_bgr = (np.clip(pred, 0, 1) * 255).astype(np.uint8)
+Process SpawnProcess-5:
+Traceback (most recent call last):
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\run_extract.py", line 61, in _worker
+    res, err = pipeline.process_one(cfg, model, row._asdict())
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 95, in process_one
+    les = compute_lesion_features_cuda(rgb, device)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 69, in compute_lesion_features_cuda
+    pred = segment(rgb, train_datasets=Dataset.ALL, device=device, image_resolution=1024)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py", line 61, in segment
+    image, roi, transforms = autofit_fundus_resolution(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        image, image_resolution, return_roi=True
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 28, in autofit_fundus_resolution
+    image, roi, margins = autocrop_fundus(fundus)
+                          ~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 139, in autocrop_fundus
+    x_range = (np.min(not_null_pixels[:, :, 0]), np.max(not_null_pixels[:, :, 0]))
+                      ~~~~~~~~~~~~~~~^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\rrwnet\preprocessing.py:91: RuntimeWarning: invalid value encountered in divide
+  enhanced_image = subtracted_image/np.std(subtracted_image)
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py:91: RuntimeWarning: invalid value encountered in cast
+  av_bgr = (np.clip(pred, 0, 1) * 255).astype(np.uint8)
+Process SpawnProcess-4:
+Traceback (most recent call last):
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\run_extract.py", line 61, in _worker
+    res, err = pipeline.process_one(cfg, model, row._asdict())
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 95, in process_one
+    les = compute_lesion_features_cuda(rgb, device)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 69, in compute_lesion_features_cuda
+    pred = segment(rgb, train_datasets=Dataset.ALL, device=device, image_resolution=1024)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py", line 61, in segment
+    image, roi, transforms = autofit_fundus_resolution(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        image, image_resolution, return_roi=True
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 28, in autofit_fundus_resolution
+    image, roi, margins = autocrop_fundus(fundus)
+                          ~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 139, in autocrop_fundus
+    x_range = (np.min(not_null_pixels[:, :, 0]), np.max(not_null_pixels[:, :, 0]))
+                      ~~~~~~~~~~~~~~~^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\rrwnet\preprocessing.py:91: RuntimeWarning: invalid value encountered in divide
+  enhanced_image = subtracted_image/np.std(subtracted_image)
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py:91: RuntimeWarning: invalid value encountered in cast
+  av_bgr = (np.clip(pred, 0, 1) * 255).astype(np.uint8)
+Process SpawnProcess-3:
+Traceback (most recent call last):
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\run_extract.py", line 61, in _worker
+    res, err = pipeline.process_one(cfg, model, row._asdict())
+               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 95, in process_one
+    les = compute_lesion_features_cuda(rgb, device)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\multidataset\pipeline.py", line 69, in compute_lesion_features_cuda
+    pred = segment(rgb, train_datasets=Dataset.ALL, device=device, image_resolution=1024)
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py", line 61, in segment
+    image, roi, transforms = autofit_fundus_resolution(
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        image, image_resolution, return_roi=True
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 28, in autofit_fundus_resolution
+    image, roi, margins = autocrop_fundus(fundus)
+                          ~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\fundus_data_toolkit\functional.py", line 139, in autocrop_fundus
+    x_range = (np.min(not_null_pixels[:, :, 0]), np.max(not_null_pixels[:, :, 0]))
+                      ~~~~~~~~~~~~~~~^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+Corrupt JPEG data: 38 extraneous bytes before marker 0xd9
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Process SpawnProcess-1:
+Traceback (most recent call last):
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 313, in _bootstrap
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\outputs_multidataset\run_extract.py", line 75, in _worker
+    row_df.to_csv(part, mode="a", header=header, index=False)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\pandas\core\generic.py", line 3976, in to_csv
+    return DataFrameRenderer(formatter).to_csv(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        path_or_buf,
+        ^^^^^^^^^^^^
+    ...<14 lines>...
+        storage_options=storage_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\pandas\io\formats\format.py", line 1025, in to_csv
+    csv_formatter.save()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\pandas\io\formats\csvs.py", line 251, in save
+    with get_handle(
+         ~~~~~~~~~~^
+        self.filepath_or_buffer,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        storage_options=self.storage_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as handles:
+    ^
+  File "C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\pandas\io\common.py", line 930, in get_handle
+    handle = open(
+        handle,
+    ...<3 lines>...
+        newline="",
+    )
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\FEDELIKA MAXIMUS\\OneDrive\\Desktop\\drfinal\\outputs_multidataset\\features_worker0.csv'
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\venv\Lib\site-packages\sklearn\svm\_base.py:239: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+C:\Users\FEDELIKA MAXIMUS\OneDrive\Desktop\drfinal\tools\fundus-lesions-toolkit\src\fundus_lesions_toolkit\models\segmentation.py:190: UserWarning: Setting dropout to 0.2
+  warnings.warn(f"Setting dropout to {initial_value}")

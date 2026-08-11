@@ -1,0 +1,90 @@
+# ============================================================
+# Configuration for the multi-dataset DR pipeline (CUDA PC)
+# Adjust paths below to match the target machine, then run:
+#   python multidataset/extract.py
+#   python multidataset/train.py
+# ============================================================
+
+# Folder containing the existing project scripts
+# (biomarkers.py, train_models.py, extract_lesions_dl.py)
+project_scripts: ../drfinal/scripts
+
+# RRWNet module + weights (copy these from the original PC)
+rrwnet_module_dir: C:/Users/samwema/Downloads/interface dr/rrwnet
+rrwnet_weights: C:/Users/samwema/Downloads/interface dr/rrwnet_RITE_1 (1).pth
+rrwnet_iterations: 1
+
+# Device: auto | cpu | cuda   (auto = use CUDA if available)
+device: auto
+
+# Random split (features.csv -> train/test) when no features_train/features_test
+test_frac: 0.2
+seed: 42
+cv_folds: 5
+
+# 6-class scheme: 0-4 are the APTOS DR grades, 5 = Other
+# (fundus images that are not DR detection targets, e.g. other pathologies)
+classes:
+  - No DR
+  - Mild DR
+  - Moderate DR
+  - Severe DR
+  - Proliferative DR
+  - Other
+
+# Model features (leave empty to use all 33 computed features)
+features: []
+
+# ---------- Dataset manifest ---------------------------------
+# Each dataset: name, folder of images, labels CSV, id/label columns.
+# `split`: train or test (test rows are held out and evaluated at the end).
+datasets:
+  aptos:
+    images_dir: ../dr_folder1/data/aptos2019/train_images
+    labels_csv: ../dr_folder1/data/aptos2019/train (1).csv
+    id_col: id_code
+    label_col: diagnosis
+    split: train
+  ddr:
+    images_dir: null
+    labels_csv: null
+    id_col: null
+    label_col: null
+    split: train
+  idrid:
+    images_dir: null
+    labels_csv: null
+    id_col: null
+    label_col: null
+    split: train
+  eyepacs:
+    images_dir: null
+    labels_csv: null
+    id_col: null
+    label_col: null
+    split: train
+  messidor:
+    images_dir: null
+    labels_csv: null
+    id_col: null
+    label_col: null
+    split: train
+  other:
+    images_dir: null
+    labels_csv: null
+    id_col: null
+    label_col: null
+    split: train
+
+# Map each dataset's native label -> unified 0-5 class index.
+# For the "other" dataset, native label 0 becomes class 5.
+label_mapping:
+  aptos: {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+  ddr: {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+  idrid: {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+  eyepacs: {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+  messidor: {0: 0, 1: 1, 2: 2, 3: 3}
+  other: {0: 5}
+
+# Output folder for features.csv, models and plots
+outputs: ../outputs_multidataset

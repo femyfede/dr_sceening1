@@ -1,0 +1,3 @@
+image_id,path,split,label_6,error
+10600_right-600-FA,C:\Users\FEDELIKA MAXIMUS\.cache\kagglehub\datasets\sehastrajits\fundus-aptosddridirdeyepacsmessidor\versions\1\split_dataset\train\1\10600_right-600-FA.jpg,train,1,degenerate image C:\Users\FEDELIKA MAXIMUS\.cache\kagglehub\datasets\sehastrajits\fundus-aptosddridirdeyepacsmessidor\versions\1\split_dataset\train\1\10600_right-600-FA.jpg (std=0.00)
+17157_left-600-FA,C:\Users\FEDELIKA MAXIMUS\.cache\kagglehub\datasets\sehastrajits\fundus-aptosddridirdeyepacsmessidor\versions\1\split_dataset\train\4\17157_left-600-FA.jpg,train,4,degenerate image C:\Users\FEDELIKA MAXIMUS\.cache\kagglehub\datasets\sehastrajits\fundus-aptosddridirdeyepacsmessidor\versions\1\split_dataset\train\4\17157_left-600-FA.jpg (std=0.00)

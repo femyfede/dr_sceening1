@@ -1,0 +1,21 @@
+device=cuda
+model loaded
+device=cuda
+model loaded
+cls=0 17.97s err=None
+cls=2 6.56s err=None
+cls=4 2.00s err=None
+mean=8.84s -> 407 img/hr
+DONE
+img=0 cls=0 18.80s err=None
+img=1 cls=0 5.26s err=None
+img=2 cls=1 1.57s err=None
+img=3 cls=1 1.91s err=None
+img=4 cls=2 6.99s err=None
+img=5 cls=2 4.16s err=None
+img=6 cls=3 3.72s err=None
+img=7 cls=3 3.20s err=None
+img=8 cls=4 1.97s err=None
+img=9 cls=4 4.11s err=None
+mean=5.17s -> 697 img/hr
+DONE

@@ -1,0 +1,22 @@
+# CUDA DR pipeline dependencies.
+# 1) Install PyTorch WITH CUDA support first (not the default PyPI build), e.g.:
+#      pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# 2) Then install the rest:
+#      pip install -r requirements.txt
+# 3) Install the lesion toolkit from source (its name is fundus_lesions_toolkit):
+#      pip install -e path/to/tools/fundus-lesions-toolkit
+#    (weights are downloaded from the HuggingFace Hub on first use)
+
+torch
+torchvision
+numpy
+pandas
+scikit-learn
+imbalanced-learn
+xgboost
+matplotlib
+seaborn
+opencv-python
+scipy
+PyYAML
+joblib
