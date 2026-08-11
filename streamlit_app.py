@@ -2,7 +2,6 @@
 # Simplified cloud version with CPU-based biomarker extraction
 import os
 import sys
-import tempfile
 import warnings
 from pathlib import Path
 
@@ -14,7 +13,7 @@ sys.path.insert(0, str(ROOT_DIR))
 
 import numpy as np
 import pandas as pd
-import cv2
+from PIL import Image
 import joblib
 import streamlit as st
 from huggingface_hub import hf_hub_download
@@ -27,6 +26,10 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 
 # Import train_models for ClassMeanImputer (required by model bundle)
 import train_models
+
+# SciPy ndimage for image processing (replaces OpenCV)
+from scipy import ndimage
+from scipy.ndimage import gaussian_filter
 
 warnings.filterwarnings("ignore")
 
@@ -45,15 +48,21 @@ def load_model_bundle():
     return joblib.load(bundle_path)
 
 
-def extract_simplified_biomarkers(image):
-    """Extract simplified biomarkers from fundus image on CPU."""
-    h, w = image.shape[:2]
+def extract_simplified_biomarkers(image_array):
+    """Extract simplified biomarkers from fundus image on CPU.
+    
+    image_array: numpy array in RGB format
+    """
+    h, w = image_array.shape[:2]
     biomarkers = {}
     
-    # Green channel enhancement (standard in DR analysis)
-    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    green = rgb[:, :, 1]
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Green channel (standard in DR analysis)
+    if image_array.ndim == 3:
+        green = image_array[:, :, 1]
+        gray = np.dot(image_array[..., :3], [0.2989, 0.5870, 0.1140])
+    else:
+        green = image_array
+        gray = image_array
     
     # Exudate detection
     exudate_mask = green > 200
@@ -76,21 +85,24 @@ def extract_simplified_biomarkers(image):
     biomarkers["HA"] = float(np.sum(hem_mask) / (h * w) * 100)
     biomarkers["HA_RET"] = biomarkers["HA"]
     
-    # Vessel detection
-    blurred = cv2.GaussianBlur(gray, (0, 0), 1)
-    vessels = cv2.addWeighted(gray, 1.5, blurred, -0.5, 0)
+    # Vessel detection using Gaussian enhancement
+    blurred = gaussian_filter(gray.astype(float) / 255.0, sigma=1)
+    vessels = (gray.astype(float) / 255.0) * 1.5 - blurred * 0.5
+    vessels = np.clip(vessels * 255, 0, 255)
     vessel_mask = vessels > 120
-    biomarkers["VESSEL_COMPLEXITY"] = float(np.sum(vessel_mask) / (h * w) * 100)
-    biomarkers["LA"] = float(np.sum(vessel_mask) / (h * w) * 100)
+    vessel_pixels = int(np.sum(vessel_mask))
+    biomarkers["VESSEL_COMPLEXITY"] = float(vessel_pixels / (h * w) * 100)
+    biomarkers["LA"] = float(vessel_pixels / (h * w) * 100)
     biomarkers["LA_RET"] = biomarkers["LA"]
     
     # Optic disc approximation
-    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    thresh = gray > 200
+    labels, num = ndimage.label(thresh)
     od_area = 0
-    if contours:
-        largest = max(contours, key=cv2.contourArea)
-        od_area = cv2.contourArea(largest)
+    if num > 0:
+        sizes = ndimage.sum(thresh, labels, range(num + 1))
+        largest_label = np.argmax(sizes[1:]) + 1
+        od_area = sizes[largest_label]
     biomarkers["optic_disc_area"] = float(od_area)
     
     # Retinal area
@@ -121,6 +133,8 @@ def extract_simplified_biomarkers(image):
             result[feat] = 0.1
         elif feat == "EA_RET":
             result[feat] = biomarkers.get("EX_AREA", 1.0)
+        elif feat == "EA":
+            result[feat] = biomarkers.get("EX_AREA", 5.0)
         elif feat == "MAC":
             result[feat] = biomarkers.get("VESSEL_COMPLEXITY", 10.0)
         elif feat == "CTW_A":
@@ -180,63 +194,59 @@ st.caption(f"Model: {bundle['model_name']} | Features: {len(bundle['features'])}
 uploaded_file = st.file_uploader("Upload Retinal Fundus Image", type=["png", "jpg", "jpeg", "bmp", "tiff"])
 
 if uploaded_file is not None:
-    # Read image
-    file_bytes = np.frombuffer(uploaded_file.read(), dtype=np.uint8)
-    bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    
-    if bgr is None:
-        st.error("Could not read the uploaded file as an image.")
-    else:
-        # Display image
-        rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    try:
+        # Read image using PIL
+        pil_img = Image.open(uploaded_file)
+        rgb = np.array(pil_img.convert("RGB"))
+        h, w = rgb.shape[:2]
         
-        col1, _ = st.columns([1, 2])
+        # Create a processed (enhanced) view
+        gray = np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140])
+        
+        col1, col2 = st.columns(2)
         with col1:
             st.image(rgb, caption="Input image", use_container_width=True)
         
         with st.spinner("Analyzing image and predicting DR severity..."):
-            try:
-                # Extract biomarkers
-                biomarkers = extract_simplified_biomarkers(bgr)
-                
-                # Make prediction
-                result = predict_severity(biomarkers, bundle)
-                
-                # Display results
-                st.success("Analysis complete!")
-                
-                c1, c2, c3 = st.columns(3)
-                with c1:
-                    st.metric("Predicted Stage", result["class"])
-                with c2:
-                    st.metric("Confidence", f"{result['confidence']:.1f}%")
-                with c3:
-                    st.metric("Model", bundle["model_name"])
-                
-                # Probability distribution
-                st.subheader("DR Severity Probabilities")
-                prob_df = pd.DataFrame({
-                    "Stage": CLASSES,
-                    "Probability (%)": [p * 100 for p in result["probabilities"]]
-                })
-                st.bar_chart(prob_df.set_index("Stage"))
-                
-                # Show processed image
-                st.subheader("Processed View")
-                gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
-                clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
-                enhanced = clahe.apply(gray)
-                st.image(enhanced, caption="Enhanced view (CLAHE)", clamp=True, channels="GRAY")
-                
-                # Show biomarkers
-                with st.expander("Extracted Biomarkers"):
-                    for k, v in biomarkers.items():
-                        if isinstance(v, (int, float)) and v > 0:
-                            st.write(f"- {k}: {float(v):.4f}")
-                            
-            except Exception as e:
-                st.error(f"Processing failed: {e}")
-                st.exception(e)
+            # Extract biomarkers
+            biomarkers = extract_simplified_biomarkers(rgb)
+            
+            # Make prediction
+            result = predict_severity(biomarkers, bundle)
+            
+            with col2:
+                # Show enhanced image
+                enhanced = np.clip((gray.astype(float) - gray.mean()) / (gray.std() + 1e-8) * 50 + 128, 0, 255).astype(np.uint8)
+                st.image(enhanced, caption="Enhanced view", use_container_width=True, channels="GRAY")
+            
+            # Display results
+            st.success("Analysis complete!")
+            
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric("Predicted Stage", result["class"])
+            with c2:
+                st.metric("Confidence", f"{result['confidence']:.1f}%")
+            with c3:
+                st.metric("Model", bundle["model_name"])
+            
+            # Probability distribution
+            st.subheader("DR Severity Probabilities")
+            prob_df = pd.DataFrame({
+                "Stage": CLASSES,
+                "Probability (%)": [p * 100 for p in result["probabilities"]]
+            })
+            st.bar_chart(prob_df.set_index("Stage"))
+            
+            # Show biomarkers
+            with st.expander("Extracted Biomarkers"):
+                for k, v in biomarkers.items():
+                    if isinstance(v, (int, float)) and v > 0:
+                        st.write(f"- {k}: {float(v):.4f}")
+                        
+    except Exception as e:
+        st.error(f"Processing failed: {e}")
+        st.exception(e)
 
 else:
     st.info("Upload a fundus image to start analysis.")
