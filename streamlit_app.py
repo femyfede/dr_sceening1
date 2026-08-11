@@ -1,5 +1,5 @@
 # Diabetic Retinopathy Screening Interface (Streamlit Cloud Version)
-# Simplified cloud version with CPU-based biomarker extraction
+# Cloud version with simplified biomarker extraction
 import os
 import sys
 import warnings
@@ -37,8 +37,9 @@ warnings.filterwarnings("ignore")
 # Configuration
 HUGGING_FACE_REPO = "samwema/dr_screening_model"
 MODEL_BUNDLE_FILE = "model_bundle.joblib"
+TRAIN_FEATURES_FILE = "features_train.csv"
 
-# Class labels - use the actual classes from the model bundle (5 classes, not 6)
+# Class labels - use the actual classes from the model (5 DR grades)
 CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR"]
 
 
@@ -48,10 +49,17 @@ def load_model_bundle():
     return joblib.load(bundle_path)
 
 
-def extract_simplified_biomarkers(image_array):
+def load_training_features():
+    """Download sample training features for reference."""
+    features_path = hf_hub_download(repo_id=HUGGING_FACE_REPO, filename=TRAIN_FEATURES_FILE)
+    return pd.read_csv(features_path)
+
+
+def extract_simplified_biomarkers(image_array, train_features):
     """Extract simplified biomarkers from fundus image on CPU.
     
-    image_array: numpy array in RGB format
+    Uses statistical methods to approximate the features used in training.
+    For accurate biomarker extraction, use the local full version with RRWNet.
     """
     h, w = image_array.shape[:2]
     biomarkers = {}
@@ -64,34 +72,37 @@ def extract_simplified_biomarkers(image_array):
         green = image_array
         gray = image_array
     
-    # Normalize green channel
-    green_norm = green.astype(float) / 255.0 if green.max() > 1 else green.astype(float)
+    # Normalize
+    green_f = green.astype(float)
+    gray_f = gray.astype(float)
     
-    # Exudate detection (bright areas in green channel)
-    exudate_mask = green > 200
+    # Use statistical properties from training data as baseline
+    train_means = train_features.mean(numeric_only=True)
+    
+    # Exudate detection
+    exudate_mask = green > np.percentile(green, 90)
     biomarkers["EX_COUNT"] = int(np.sum(exudate_mask) // 500)
     biomarkers["EX_AREA"] = float(np.sum(exudate_mask) / (h * w) * 100)
     
     # Hard exudates
-    hard_mask = green > 220
+    hard_mask = green > np.percentile(green, 95)
     biomarkers["hard_exudate_count"] = int(np.sum(hard_mask) // 500)
     biomarkers["hard_exudate_area"] = float(np.sum(hard_mask) / (h * w) * 100)
     
     # Microaneurysms (dark dots)
-    micro_mask = (green < 80) & (green > 30)
+    micro_mask = green < np.percentile(green, 10)
     biomarkers["MA_COUNT"] = int(np.sum(micro_mask) // 100)
     biomarkers["MA_A"] = float(np.sum(micro_mask) / (h * w) * 100)
     
-    # Hemorrhage detection (red/brown areas appear dark in green channel)
-    hem_mask = (green < 100) & (green > 40)
+    # Hemorrhage detection
+    hem_mask = (green < np.percentile(green, 20)) & (green > np.percentile(green, 5))
     biomarkers["HE_COUNT"] = int(np.sum(hem_mask) // 300)
     biomarkers["HA"] = float(np.sum(hem_mask) / (h * w) * 100)
     biomarkers["HA_RET"] = biomarkers["HA"]
     
     # Vessel detection using Gaussian enhancement
-    gray_f = gray.astype(float) / 255.0 if gray.max() > 1 else gray.astype(float)
-    blurred = gaussian_filter(gray_f, sigma=1)
-    vessels = gray_f * 1.5 - blurred * 0.5
+    blurred = gaussian_filter(gray_f / 255.0 if gray_f.max() > 1 else gray_f, sigma=1)
+    vessels = (gray_f / 255.0 if gray_f.max() > 1 else gray_f) * 1.5 - blurred * 0.5
     vessels = np.clip(vessels * 255, 0, 255)
     vessel_mask = vessels > 120
     vessel_pixels = int(np.sum(vessel_mask))
@@ -99,8 +110,8 @@ def extract_simplified_biomarkers(image_array):
     biomarkers["LA"] = float(vessel_pixels / (h * w) * 100)
     biomarkers["LA_RET"] = biomarkers["LA"]
     
-    # Optic disc approximation (brightest area)
-    thresh = gray > (gray.mean() + gray.std())
+    # Optic disc approximation
+    thresh = gray > np.percentile(gray, 95)
     labels, num = ndimage.label(thresh)
     od_area = 0
     if num > 0:
@@ -112,7 +123,30 @@ def extract_simplified_biomarkers(image_array):
     # Retinal area
     biomarkers["retina_area_px"] = float(h * w)
     
-    return biomarkers
+    # Fill features using training data stats as guidance
+    result = {}
+    for feat in [
+        "AVR", "CRAE", "CRVE", "VD", "AD", "VeD", "TI", "CI", "FD",
+        "ATI", "VTI", "AFD", "VFD", "JUNC", "VLEN",
+        "AWID", "AWID_SD", "VWID", "VWID_SD", "WID", "WID_SD", "ADV_RATIO",
+        "LA", "HA", "EA", "MAC",
+        "HE_COUNT", "EX_COUNT", "CTW_A", "MA_A", "LA_RET", "HA_RET", "EA_RET",
+    ]:
+        if feat in biomarkers:
+            result[feat] = biomarkers[feat]
+        elif feat in train_means.index:
+            # Use training mean as baseline
+            result[feat] = float(train_means[feat]) if not np.isnan(train_means[feat]) else 0.0
+        elif feat == "AVR":
+            result[feat] = 0.15
+        elif feat in ["CRAE", "CRVE"]:
+            result[feat] = float(train_means.get(feat, 50.0))
+        elif feat == "EA_RET":
+            result[feat] = biomarkers.get("EX_AREA", 1.0)
+        else:
+            result[feat] = 0.0
+    
+    return result
 
 
 def predict_severity(biomarkers, bundle):
@@ -153,15 +187,15 @@ st.markdown("""
 Upload a retinal fundus image to get an AI-powered DR severity prediction.
 
 **Note**: This is a cloud version with simplified image processing.
-The full version with RRWNet segmentation is available locally.
+The full version with RRWNet segmentation runs locally with GPU for best accuracy.
 """)
 
-# Load model
+# Load model and training data
 try:
     bundle = st.cache_resource(load_model_bundle)()
-    available_classes = bundle.get("classes", CLASSES)
+    train_features = st.cache_data(load_training_features)()
 except Exception as e:
-    st.error(f"Failed to load model: {e}")
+    st.error(f"Failed to load resources: {e}")
     st.stop()
 
 st.caption(f"Model: {bundle['model_name']} | Features: {len(bundle['features'])}")
@@ -184,8 +218,8 @@ if uploaded_file is not None:
             st.image(rgb, caption="Input image", use_container_width=True)
         
         with st.spinner("Analyzing image and predicting DR severity..."):
-            # Extract biomarkers
-            biomarkers = extract_simplified_biomarkers(rgb)
+            # Extract biomarkers using simplified method
+            biomarkers = extract_simplified_biomarkers(rgb, train_features)
             
             # Make prediction
             result = predict_severity(biomarkers, bundle)
@@ -193,7 +227,10 @@ if uploaded_file is not None:
             
             with col2:
                 # Show enhanced image
-                enhanced = np.clip((gray.astype(float) - gray.mean()) / (gray.std() + 1e-8) * 50 + 128, 0, 255).astype(np.uint8)
+                gray_f = gray.astype(float)
+                if gray_f.max() > 1:
+                    gray_f = gray_f / 255.0
+                enhanced = np.clip((gray_f - gray_f.mean()) / (gray_f.std() + 1e-8) * 50 + 128, 0, 255).astype(np.uint8)
                 st.image(enhanced, caption="Enhanced view", use_container_width=True, channels="GRAY")
             
             # Display results
@@ -207,7 +244,7 @@ if uploaded_file is not None:
             with c3:
                 st.metric("Model", bundle["model_name"])
             
-            # Probability distribution - use actual classes from model
+            # Probability distribution
             st.subheader("DR Severity Probabilities")
             prob_df = pd.DataFrame({
                 "Stage": class_names,
@@ -221,12 +258,13 @@ if uploaded_file is not None:
             
             with fig_col1:
                 green = rgb[:, :, 1]
-                exudate_mask = green > 200
-                st.image((exudate_mask * 255).astype(np.uint8), caption="Exudates", channels="GRAY")
+                green_f = green.astype(float) / 255.0 if green.max() > 1 else green.astype(float)
+                exudate_mask = (green_f > np.percentile(green_f, 90)) * 255
+                st.image(exudate_mask.astype(np.uint8), caption="Exudates", channels="GRAY")
             
             with fig_col2:
-                micro_mask = (green < 80) & (green > 30)
-                st.image((micro_mask * 255).astype(np.uint8), caption="Microaneurysms", channels="GRAY")
+                micro_mask = (green_f < np.percentile(green_f, 10)) * 255
+                st.image(micro_mask.astype(np.uint8), caption="Microaneurysms", channels="GRAY")
             
             with fig_col3:
                 gray_f = gray.astype(float) / 255.0 if gray.max() > 1 else gray.astype(float)
@@ -249,9 +287,10 @@ if uploaded_file is not None:
 else:
     st.info("Upload a fundus image to start analysis.")
     
-    with st.expander("What to expect"):
-        st.write("When you upload an image, the app will:")
-        st.write("- Extract biomarkers using image processing")
-        st.write("- Predict DR severity class (No DR, Mild, Moderate, Severe, Proliferative)")
-        st.write("- Show confidence scores and probability distribution")
-        st.write("- Display visualization of detected features")
+    with st.expander("How it works"):
+        st.write("1. **Upload** a retinal fundus image (PNG/JPG)")
+        st.write("2. **Biomarkers** are extracted using image processing")
+        st.write("3. **Severity prediction** uses a RandomForest model trained on 33 biomarkers")
+        st.write("4. **Results** show DR severity class and probability distribution")
+        
+        st.warning("The cloud version uses simplified biomarker extraction. For clinical accuracy, use the local version with RRWNet segmentation and GPU processing.")
