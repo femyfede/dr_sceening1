@@ -38,8 +38,8 @@ warnings.filterwarnings("ignore")
 HUGGING_FACE_REPO = "samwema/dr_screening_model"
 MODEL_BUNDLE_FILE = "model_bundle.joblib"
 
-# Class labels - use the actual classes from the model bundle
-CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR", "Other"]
+# Class labels - use the actual classes from the model bundle (5 classes, not 6)
+CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR"]
 
 
 def load_model_bundle():
@@ -130,12 +130,11 @@ def predict_severity(biomarkers, bundle):
     proba = pipe.predict_proba(X)[0]
     pred_class = int(pipe.predict(X)[0])
     
-    # Get the actual class labels from the model
-    classes = bundle["classes"]
-    class_names = classes if classes else CLASSES
+    # Use actual number of classes from model
+    n_classes = len(proba)
+    class_names = CLASSES[:n_classes]
     
-    # Handle variable number of classes
-    pred_label = class_names[pred_class] if pred_class < len(class_names) else "Other"
+    pred_label = class_names[pred_class] if pred_class < len(class_names) else "Unknown"
     confidence = proba[pred_class] * 100
     
     return {
