@@ -1,5 +1,5 @@
 # Diabetic Retinopathy Screening Interface (Streamlit Cloud Version)
-# This is a simplified version that downloads the model from Hugging Face
+# Simplified cloud version with CPU-based biomarker extraction
 import os
 import sys
 import tempfile
@@ -13,41 +13,44 @@ import joblib
 import streamlit as st
 from huggingface_hub import hf_hub_download
 
+# Add current directory to path for custom model classes
+SCRIPT_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+# Required for loading the model bundle (custom classes)
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from imblearn.pipeline import Pipeline as ImbPipeline
+
+# Import train_models for ClassMeanImputer (required by model bundle)
+import train_models
+
 warnings.filterwarnings("ignore")
+
 
 # Configuration
 HUGGING_FACE_REPO = "samwema/dr_screening_model"
 MODEL_BUNDLE_FILE = "model_bundle.joblib"
-TRAIN_FEATURES_FILE = "features_train.csv"
 
-# Class labels from the original training
+# Class labels
 CLASSES = ["No DR", "Mild DR", "Moderate DR", "Severe DR", "Proliferative DR", "Other"]
 
-# Feature list matching the training script
-FEATURES = [
-    "AVR", "CRAE", "CRVE", "VD", "AD", "VeD", "TI", "CI", "FD",
-    "ATI", "VTI", "AFD", "VFD", "JUNC", "VLEN",
-    "AWID", "AWID_SD", "VWID", "VWID_SD", "WID", "WID_SD", "ADV_RATIO",
-    "LA", "HA", "EA", "MAC",
-    "HE_COUNT", "EX_COUNT", "CTW_A", "MA_A", "LA_RET", "HA_RET", "EA_RET",
-]
 
 def load_model_bundle():
     """Download and load model bundle from Hugging Face."""
     bundle_path = hf_hub_download(repo_id=HUGGING_FACE_REPO, filename=MODEL_BUNDLE_FILE)
     return joblib.load(bundle_path)
 
+
 def extract_simplified_biomarkers(image):
-    """Extract simplified biomarkers from fundus image on CPU.
-    
-    This is a faster, CPU-only approximation of the full pipeline.
-    Full biomarker extraction would require RRWNet segmentation.
-    """
+    """Extract simplified biomarkers from fundus image on CPU."""
     h, w = image.shape[:2]
     biomarkers = {}
     
     # Green channel enhancement (standard in DR analysis)
-    green = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)[:, :, 1]
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    green = rgb[:, :, 1]
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     # Exudate detection
@@ -71,8 +74,7 @@ def extract_simplified_biomarkers(image):
     biomarkers["HA"] = float(np.sum(hem_mask) / (h * w) * 100)
     biomarkers["HA_RET"] = biomarkers["HA"]
     
-
-    # Vessel detection (simple filtering)
+    # Vessel detection
     blurred = cv2.GaussianBlur(gray, (0, 0), 1)
     vessels = cv2.addWeighted(gray, 1.5, blurred, -0.5, 0)
     vessel_mask = vessels > 120
@@ -94,7 +96,13 @@ def extract_simplified_biomarkers(image):
     
     # Fill all features with estimated values
     result = {}
-    for feat in FEATURES:
+    for feat in [
+        "AVR", "CRAE", "CRVE", "VD", "AD", "VeD", "TI", "CI", "FD",
+        "ATI", "VTI", "AFD", "VFD", "JUNC", "VLEN",
+        "AWID", "AWID_SD", "VWID", "VWID_SD", "WID", "WID_SD", "ADV_RATIO",
+        "LA", "HA", "EA", "MAC",
+        "HE_COUNT", "EX_COUNT", "CTW_A", "MA_A", "LA_RET", "HA_RET", "EA_RET",
+    ]:
         if feat in biomarkers:
             result[feat] = biomarkers[feat]
         elif feat == "AVR":
@@ -120,6 +128,7 @@ def extract_simplified_biomarkers(image):
     
     return result
 
+
 def predict_severity(biomarkers, bundle):
     """Run severity prediction on extracted biomarkers."""
     pipe = bundle["pipeline"]
@@ -143,6 +152,7 @@ def predict_severity(biomarkers, bundle):
         "confidence": confidence,
         "probabilities": proba.tolist()
     }
+
 
 # Streamlit UI
 st.set_page_config(page_title="DR Screening", layout="wide")
@@ -229,7 +239,6 @@ if uploaded_file is not None:
 else:
     st.info("Upload a fundus image to start analysis.")
     
-    # Demo with sample
     with st.expander("Sample Results (from training data)"):
         st.write("When you upload an image, you'll see:")
         st.write("- Predicted DR severity class (No DR, Mild, Moderate, Severe, Proliferative)")
